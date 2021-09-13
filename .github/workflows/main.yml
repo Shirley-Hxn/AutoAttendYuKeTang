@@ -1,0 +1,67 @@
+name: Attend
+
+on:
+    push:
+        branches:
+          - main
+    workflow_dispatch:
+    schedule:
+        - cron: '30 23 * 2,3,4,5,6,9,10,11,12,1 *'
+    repository_dispatch:
+        types: joy
+
+jobs:
+    run1:
+        runs-on: macos-latest
+        strategy:
+            matrix:
+                python-version: [3.9]
+        steps:
+            - name: Checkout
+              run: |
+                  git clone https://github.com/0Chencc/AutoAttendYuKeTang ~/AutoAttendYuKeTang
+            - uses: actions/checkout@v2
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v2
+              with:
+                  python-version: ${{ matrix.python-version }}
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+            - name: '运行自动签到'
+              run: |
+                  python ./src/startup.py
+              env:
+                  USER_INFO: ${{ secrets.USER_INFO }}
+                  PUSH_KEY: ${{ secrets.PUSH_KEY }}
+                  SECRET: ${{ secrets.SECRET }}
+                  WEBHOOK: ${{ secrets.WEBHOOK }}
+    run2:
+        runs-on: macos-latest
+        needs: run1
+        strategy:
+            matrix:
+                python-version: [ 3.9 ]
+
+        steps:
+            - name: Checkout
+              run: |
+                  git clone https://github.com/0Chencc/AutoAttendYuKeTang ~/AutoAttendYuKeTang
+            - uses: actions/checkout@v2
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v2
+              with:
+                  python-version: ${{ matrix.python-version }}
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+            - name: '运行自动签到'
+              run: |
+                  python ./src/startup.py
+              env:
+                  USER_INFO: ${{ secrets.USER_INFO }}
+                  PUSH_KEY: ${{ secrets.PUSH_KEY }}
+                  SECRET: ${{ secrets.SECRET }}
+                  WEBHOOK: ${{ secrets.WEBHOOK }}
